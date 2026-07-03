@@ -1,76 +1,32 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Play, Video, ExternalLink, ChevronLeft } from 'lucide-react'
 import { SEO } from '../components/SEO'
 import seoData from '../data/seo.json'
 import { useReveal } from '../hooks/useReveal'
+import { videos as videosApi } from '../services/api'
 
 /* YouTube embed : attributs complets recommandés par Google */
 const YT_ALLOW = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
 
 const YT = (id) => `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&color=white`
 
-const videos = [
-  {
-    id: 1,
-    ytId: '3NrFXa8DtYE',
-    title: 'La Transformation de la Pêche Moderne en Côte d\'Ivoire',
-    category: 'Documentaire',
-    date: 'Août 2024',
-    thumbnail: `https://img.youtube.com/vi/3NrFXa8DtYE/maxresdefault.jpg`,
-    embedUrl: YT('3NrFXa8DtYE'),
-    desc: 'Un documentaire qui retrace l\'évolution de la pêche en Côte d\'Ivoire, des techniques traditionnelles aux innovations, en mettant en lumière le rôle d\'Interpêche CI.',
-  },
-  {
-    id: 2,
-    ytId: 'd8Emea2agW8',
-    title: 'La Pêche Artisanale en Côte d\'Ivoire',
-    category: 'Documentaire',
-    date: 'Août 2024',
-    thumbnail: `https://img.youtube.com/vi/d8Emea2agW8/maxresdefault.jpg`,
-    embedUrl: YT('d8Emea2agW8'),
-    desc: 'Découverte de la pêche artisanale ivoirienne, ses acteurs, ses défis et les actions d\'Interpêche CI pour les accompagner.',
-  },
-  {
-    id: 3,
-    ytId: '3otPmUZLBJA',
-    title: 'Techniques Modernes de Pêche',
-    category: 'Formation',
-    date: 'Août 2024',
-    thumbnail: `https://img.youtube.com/vi/3otPmUZLBJA/maxresdefault.jpg`,
-    embedUrl: YT('3otPmUZLBJA'),
-    desc: 'Présentation des techniques modernes de pêche durables adoptées par les membres d\'Interpêche CI pour améliorer leurs rendements.',
-  },
-  {
-    id: 4,
-    ytId: 'vfoU8EKITZ8',
-    title: 'Présentation d\'Interpêche CI',
-    category: 'Présentation',
-    date: 'Mars 2024',
-    thumbnail: `https://img.youtube.com/vi/vfoU8EKITZ8/maxresdefault.jpg`,
-    embedUrl: YT('vfoU8EKITZ8'),
-    desc: 'Présentation officielle de l\'Interprofession de la filière pêche Côte d\'Ivoire — missions, organisation, membres et perspectives.',
-  },
-  {
-    id: 5,
-    ytId: null,
-    title: 'Journée départementale de la pêche — Grand-Lahou',
-    category: 'Événement',
-    date: 'Novembre 2025',
-    thumbnail: '/assets/img/news/grand-lahou-21-11/edition-6 (1).jpeg',
-    embedUrl: '',
-    desc: '6ème édition de la Journée Départementale de la Pêche et de la Culture à Grand-Lahou.',
-  },
-  {
-    id: 6,
-    ytId: null,
-    title: 'Formation des mareyeuses — Yamoussoukro 2025',
-    category: 'Formation',
-    date: 'Septembre 2025',
-    thumbnail: '/assets/img/atelier/atelier (1).jpg',
-    embedUrl: '',
-    desc: 'Atelier de renforcement des capacités de 30 mareyeuses en techniques de vente et de gestion.',
-  },
-]
+const MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+function formatDateFR(iso) {
+  if (!iso) return ''
+  const [y, m, d] = (iso.split('T')[0]).split('-')
+  return `${parseInt(d, 10)} ${MONTHS_FR[parseInt(m, 10) - 1]} ${y}`
+}
+
+const mapVideo = (v) => ({
+  ...v,
+  ytId:     v.youtube_id,
+  embedUrl: v.embed_url || (v.youtube_id ? YT(v.youtube_id) : ''),
+  thumbnail: v.thumbnail_url,
+  desc:     v.description,
+  date:     formatDateFR(v.date_publication),
+  title:    v.titre,
+  category: v.categorie,
+})
 
 const categories = ['Toutes', 'Documentaire', 'Présentation', 'Formation', 'Événement']
 
@@ -138,15 +94,22 @@ function YouTubePlayer({ vid }) {
 }
 
 export default function Videos() {
+  const [allVideos, setAllVideos]           = useState([])
   const [activeCategory, setActiveCategory] = useState('Toutes')
-  const [playing, setPlaying] = useState(null)
-  const [headerRef, headerVisible] = useReveal()
-  const [gridRef, gridVisible] = useReveal()
+  const [playing, setPlaying]               = useState(null)
+  const [headerRef, headerVisible]          = useReveal()
+  const [gridRef, gridVisible]              = useReveal()
 
-  const filtered = videos.filter((v) => activeCategory === 'Toutes' || v.category === activeCategory)
+  useEffect(() => {
+    videosApi.list({ published: 1 })
+      .then((rows) => setAllVideos((rows || []).map(mapVideo)))
+      .catch(console.error)
+  }, [])
+
+  const filtered = allVideos.filter((v) => activeCategory === 'Toutes' || v.category === activeCategory)
 
   /* Cherche dans TOUS les videos (pas seulement filtered) pour éviter les bugs de filtre */
-  const playingVid = playing !== null ? videos.find((v) => v.id === playing) : null
+  const playingVid = playing !== null ? allVideos.find((v) => v.id === playing) : null
 
   return (
     <>

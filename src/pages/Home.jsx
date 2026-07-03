@@ -6,8 +6,22 @@ import {
   Mail, Send, CheckCircle, TrendingUp, Shield, Globe, Waves,
 } from 'lucide-react'
 import { SEO } from '../components/SEO'
-import newsData from '../data/news.json'
+import { articles as articlesApi } from '../services/api'
 import seoData from '../data/seo.json'
+
+const MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+function formatDateFR(iso) {
+  if (!iso) return ''
+  const [y, m, d] = (iso.split('T')[0]).split('-')
+  return `${parseInt(d, 10)} ${MONTHS_FR[parseInt(m, 10) - 1]} ${y}`
+}
+const mapArticle = (a) => ({
+  ...a,
+  image:    a.image_url,
+  auteur:   a.auteur_nom,
+  date:     formatDateFR(a.date_publication),
+  carousel: Boolean(a.carousel),
+})
 import NewsModal from '../components/NewsModal'
 import LazyImage from '../components/LazyImage'
 import { useReveal } from '../hooks/useReveal'
@@ -164,8 +178,8 @@ const services = [
 ]
 
 export default function Home() {
-  const carouselNews = newsData.actualites.filter((n) => n.carousel)
-  const recentNews   = newsData.actualites.slice(0, 3)
+  const [carouselNews, setCarouselNews] = useState([])
+  const [recentNews, setRecentNews]     = useState([])
 
   const [slide, setSlide] = useState(0)
   const [selectedArticle, setArticle] = useState(null)
@@ -179,13 +193,19 @@ export default function Home() {
   const [s3, t3] = useCounter(20,   1200, statsVisible)
   const [s4, t4] = useCounter(1000, 2500, statsVisible)
 
+  useEffect(() => {
+    articlesApi.carousel().then((rows) => setCarouselNews((rows || []).map(mapArticle))).catch(console.error)
+    articlesApi.recent(3).then((rows) => setRecentNews((rows || []).map(mapArticle))).catch(console.error)
+  }, [])
+
   const prevSlide = useCallback(() => setSlide((s) => (s - 1 + carouselNews.length) % carouselNews.length), [carouselNews.length])
   const nextSlide = useCallback(() => setSlide((s) => (s + 1) % carouselNews.length), [carouselNews.length])
 
   useEffect(() => {
+    if (carouselNews.length === 0) return
     const t = setInterval(nextSlide, 6000)
     return () => clearInterval(t)
-  }, [nextSlide])
+  }, [nextSlide, carouselNews.length])
 
   return (
     <>

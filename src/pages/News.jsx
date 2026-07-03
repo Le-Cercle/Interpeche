@@ -2,10 +2,24 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Search, Filter, Calendar, User, X, Newspaper } from 'lucide-react'
 import { SEO } from '../components/SEO'
 import seoData from '../data/seo.json'
-import newsData from '../data/news.json'
+import { articles as articlesApi } from '../services/api'
 import NewsModal from '../components/NewsModal'
 import LazyImage from '../components/LazyImage'
 import { useReveal } from '../hooks/useReveal'
+
+const MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+function formatDateFR(iso) {
+  if (!iso) return ''
+  const [y, m, d] = (iso.split('T')[0]).split('-')
+  return `${parseInt(d, 10)} ${MONTHS_FR[parseInt(m, 10) - 1]} ${y}`
+}
+const mapArticle = (a) => ({
+  ...a,
+  image:   a.image_url,
+  auteur:  a.auteur_nom,
+  date:    formatDateFR(a.date_publication),
+  carousel: Boolean(a.carousel),
+})
 
 /* ─── Category map ─── */
 const categories = [
@@ -42,6 +56,7 @@ function Highlight({ text, query }) {
 const PAGE_SIZE = 6
 
 export default function News() {
+  const [allArticles, setAllArticles]   = useState([])
   const [search, setSearch]             = useState('')
   const [debouncedSearch, setDebounced] = useState('')
   const [activeCategory, setCategory]   = useState('Toutes')
@@ -49,6 +64,13 @@ export default function News() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [headerRef, headerVisible]      = useReveal()
   const searchRef = useRef(null)
+
+  /* Fetch articles from API */
+  useEffect(() => {
+    articlesApi.list({ limit: 200, published: 1 })
+      .then((rows) => setAllArticles((rows || []).map(mapArticle)))
+      .catch(console.error)
+  }, [])
 
   /* Debounce search input by 200ms */
   useEffect(() => {
@@ -60,7 +82,7 @@ export default function News() {
   useEffect(() => { setVisibleCount(PAGE_SIZE) }, [activeCategory, debouncedSearch])
 
   /* Filter articles */
-  const filtered = newsData.actualites.filter((n) => {
+  const filtered = allArticles.filter((n) => {
     const matchCat    = activeCategory === 'Toutes' || n.categorie === activeCategory
     const q           = debouncedSearch.toLowerCase()
     const matchSearch = !q ||
@@ -156,8 +178,8 @@ export default function News() {
             <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
             {categories.map((cat) => {
               const count = cat === 'Toutes'
-                ? newsData.actualites.length
-                : newsData.actualites.filter((n) => n.categorie === cat).length
+                ? allArticles.length
+                : allArticles.filter((n) => n.categorie === cat).length
               return (
                 <button
                   key={cat}

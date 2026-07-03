@@ -1,115 +1,28 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { X, ZoomIn, Images, ChevronLeft, ChevronRight } from 'lucide-react'
 import { SEO } from '../components/SEO'
 import seoData from '../data/seo.json'
 import { useReveal } from '../hooks/useReveal'
+import { gallery as galleryApi } from '../services/api'
+
+const mapPhoto = (p) => ({ ...p, src: p.image_url, cat: p.category })
 
 const categories = ['Toutes', 'Ateliers', 'Événements', 'Formations', 'Partenariats']
 
-const photos = [
-  { id: 1, src: '/assets/img/atelier/atelier (1).jpg', cat: 'Ateliers', title: 'Atelier de travail', cols: 1, rows: 1 },
-  { id: 2, src: '/assets/img/atelier/atelier (2).jpg', cat: 'Ateliers', title: 'Session de formation', cols: 1, rows: 2 },
-  { id: 3, src: '/assets/img/atelier/atelier (3).jpg', cat: 'Ateliers', title: 'Présentation technique', cols: 1, rows: 1 },
-  { id: 4, src: '/assets/img/atelier/atelier (4).jpg', cat: 'Ateliers', title: 'Échange d\'expériences', cols: 2, rows: 1 },
-  { id: 5, src: '/assets/img/atelier/atelier (5).jpg', cat: 'Ateliers', title: 'Groupe de travail', cols: 1, rows: 1 },
-  { id: 6, src: '/assets/img/atelier/atelier (6).jpg', cat: 'Ateliers', title: 'Démonstration pratique', cols: 1, rows: 1 },
-  { id: 7, src: '/assets/img/atelier/atelier (7).jpg', cat: 'Événements', title: 'Cérémonie officielle', cols: 1, rows: 1 },
-  { id: 8, src: '/assets/img/news/news-1.jpg', cat: 'Événements', title: 'Campagne 2025', cols: 1, rows: 1 },
-  { id: 9, src: '/assets/img/news/news-2.jpg', cat: 'Événements', title: 'Activités filière', cols: 1, rows: 1 },
-  { id: 10, src: '/assets/img/news/news-3.jpg', cat: 'Partenariats', title: 'Réunion BAD', cols: 2, rows: 1 },
-  { id: 11, src: '/assets/img/news/news-4.jpg', cat: 'Formations', title: 'Calendrier pêche', cols: 1, rows: 1 },
-  { id: 12, src: '/assets/img/news/news-5.jpg', cat: 'Formations', title: 'Repos biologique', cols: 1, rows: 1 },
-  { id: 13, src: '/assets/img/news/news-6.jpg', cat: 'Événements', title: 'Inauguration siège', cols: 1, rows: 1 },
-  { id: 14, src: '/assets/img/PM.jpg', cat: 'Événements', title: 'Salon pêche 2025', cols: 1, rows: 1 },
-  { id: 15, src: '/assets/img/about.jpg', cat: 'Partenariats', title: 'Interpêche CI', cols: 1, rows: 1 },
-
-  /* ─── COMATPH-CI — AG 2026 ─── */
-  { id: 16, src: '/assets/img/news/comatph/comatph-01.jpeg', cat: 'Événements', title: 'AG COMATPH-CI', cols: 1, rows: 1 },
-  { id: 17, src: '/assets/img/news/comatph/comatph-02.jpeg', cat: 'Événements', title: 'Présidente COMATPH-CI', cols: 1, rows: 1 },
-  { id: 18, src: '/assets/img/news/comatph/comatph-03.jpeg', cat: 'Événements', title: 'Habdramane Coulibaly', cols: 1, rows: 1 },
-  { id: 19, src: '/assets/img/news/comatph/comatph-04.jpeg', cat: 'Événements', title: 'Cellule genre du ministère', cols: 1, rows: 1 },
-  { id: 20, src: '/assets/img/news/comatph/comatph-05.jpeg', cat: 'Événements', title: 'Mareyeuses et transformatrices', cols: 1, rows: 1 },
-  { id: 21, src: '/assets/img/news/comatph/comatph-06.jpeg', cat: 'Événements', title: 'Photo de groupe COMATPH-CI', cols: 1, rows: 1 },
-
-  /* ─── Gouvernance des interprofessions — DOPAF 2026 ─── */
-  { id: 22, src: '/assets/img/news/gouvernance-interprofessions/atelier-01.jpeg', cat: 'Ateliers', title: 'Atelier national OIA', cols: 1, rows: 1 },
-  { id: 23, src: '/assets/img/news/gouvernance-interprofessions/atelier-02.jpeg', cat: 'Ateliers', title: 'Kassogué Daouda — DOPAF', cols: 1, rows: 1 },
-  { id: 24, src: '/assets/img/news/gouvernance-interprofessions/atelier-03.jpeg', cat: 'Ateliers', title: 'Responsables des interprofessions', cols: 1, rows: 1 },
-  { id: 25, src: '/assets/img/news/gouvernance-interprofessions/atelier-04.jpeg', cat: 'Ateliers', title: 'Ouverture officielle DOPAF', cols: 1, rows: 1 },
-
-  /* ─── Autonomisation des femmes — San Pedro ─── */
-  { id: 26, src: '/assets/img/news/autonomisation-femmes/autonomisation-1.jpeg', cat: 'Événements', title: 'Délégation Coopérative Espoir', cols: 1, rows: 1 },
-  { id: 27, src: '/assets/img/news/autonomisation-femmes/autonomisation-2.jpeg', cat: 'Événements', title: 'Conteneur frigorifique 40 pieds', cols: 1, rows: 1 },
-
-  /* ─── Partenariat SURIMI — Uminokuni ─── */
-  { id: 28, src: '/assets/img/news/02-06/02-06 (1).jpeg', cat: 'Partenariats', title: 'Réunion SURIMI', cols: 1, rows: 1 },
-  { id: 29, src: '/assets/img/news/02-06/02-06 (2).jpeg', cat: 'Partenariats', title: 'Délégation Uminokuni', cols: 1, rows: 1 },
-  { id: 30, src: '/assets/img/news/02-06/02-06 (3).jpeg', cat: 'Partenariats', title: 'Projets SURIMI', cols: 1, rows: 1 },
-  { id: 31, src: '/assets/img/news/02-06/02-06 (4).jpeg', cat: 'Partenariats', title: 'Kassogué Daouda et délégation japonaise', cols: 1, rows: 1 },
-  { id: 32, src: '/assets/img/news/02-06/02-06 (5).jpeg', cat: 'Partenariats', title: 'Séance de travail SURIMI', cols: 1, rows: 1 },
-  { id: 33, src: '/assets/img/news/02-06/02-06 (6).jpeg', cat: 'Partenariats', title: 'Engagement INTERPÊCHE-CI', cols: 1, rows: 1 },
-  { id: 34, src: '/assets/img/news/02-06/02-06 (7).jpeg', cat: 'Partenariats', title: 'Visite Port de Pêche', cols: 1, rows: 1 },
-  { id: 35, src: '/assets/img/news/02-06/02-06 (8).jpeg', cat: 'Partenariats', title: 'Infrastructures halieutiques', cols: 1, rows: 1 },
-  { id: 36, src: '/assets/img/news/02-06/02-06 (9).jpeg', cat: 'Partenariats', title: 'Coopération CI-Japon', cols: 1, rows: 1 },
-
-  /* ─── Économie bleue — Audience ministérielle ─── */
-  { id: 37, src: '/assets/img/interpeche/developpement (1).jpeg', cat: 'Événements', title: 'Audience au cabinet du ministre', cols: 1, rows: 1 },
-  { id: 38, src: '/assets/img/interpeche/developpement (2).jpeg', cat: 'Événements', title: 'Projets de l\'économie bleue', cols: 1, rows: 1 },
-  { id: 39, src: '/assets/img/interpeche/developpement (3).jpeg', cat: 'Événements', title: 'Plan stratégique filière pêche', cols: 1, rows: 1 },
-  { id: 40, src: '/assets/img/interpeche/developpement (4).jpeg', cat: 'Événements', title: 'Partenariats internationaux', cols: 1, rows: 1 },
-  { id: 41, src: '/assets/img/interpeche/developpement (5).jpeg', cat: 'Événements', title: 'Rencontre au ministère', cols: 1, rows: 1 },
-
-  /* ─── Formation des mareyeuses — Yamoussoukro 2025 ─── */
-  { id: 42, src: '/assets/img/news/02-10/10/WhatsApp Image 2025-10-02 à 01.43.01_c8275d96.jpg', cat: 'Formations', title: 'Formation des mareyeuses', cols: 1, rows: 1 },
-  { id: 43, src: '/assets/img/news/02-10/10/WhatsApp Image 2025-10-02 à 01.43.02_ebe4de44.jpg', cat: 'Formations', title: 'Participantes à la formation', cols: 1, rows: 1 },
-
-  /* ─── Cotisations Volontaires Obligatoires — CVO ─── */
-  { id: 44, src: '/assets/img/news/02-10/IMG_4562.png', cat: 'Ateliers', title: 'Réunion du Conseil d\'Administration', cols: 1, rows: 1 },
-  { id: 45, src: '/assets/img/news/02-10/IMG_4478.png', cat: 'Ateliers', title: 'Participants à la réunion CVO', cols: 1, rows: 1 },
-  { id: 46, src: '/assets/img/news/02-10/IMG_4479.png', cat: 'Ateliers', title: 'Discussions sur l\'autofinancement', cols: 1, rows: 1 },
-
-  /* ─── Remise des décrets OIA — 2025 ─── */
-  { id: 47, src: '/assets/img/atelier/atelier (8).jpg', cat: 'Ateliers', title: 'Cérémonie OIA', cols: 1, rows: 1 },
-  { id: 48, src: '/assets/img/atelier/atelier (9).jpg', cat: 'Ateliers', title: 'Acteurs du secteur', cols: 1, rows: 1 },
-  { id: 49, src: '/assets/img/atelier/atelier (10).jpg', cat: 'Ateliers', title: 'Remise des documents', cols: 1, rows: 1 },
-  { id: 50, src: '/assets/img/atelier/atelier (11).jpg', cat: 'Ateliers', title: 'Moment de la cérémonie', cols: 1, rows: 1 },
-  { id: 51, src: '/assets/img/atelier/atelier (12).jpg', cat: 'Ateliers', title: 'Représentants officiels', cols: 1, rows: 1 },
-  { id: 52, src: '/assets/img/atelier/atelier (13).jpg', cat: 'Ateliers', title: 'Photo de groupe OIA', cols: 1, rows: 1 },
-
-  /* ─── Journée Départementale Grand-Lahou ─── */
-  { id: 53, src: '/assets/img/news/grand-lahou-21-11/edition-6 (1).jpeg', cat: 'Événements', title: 'Journée Départementale Grand-Lahou', cols: 1, rows: 1 },
-  { id: 54, src: '/assets/img/news/grand-lahou-21-11/edition-6 (2).jpeg', cat: 'Événements', title: 'Participants Grand-Lahou', cols: 1, rows: 1 },
-  { id: 55, src: '/assets/img/news/grand-lahou-21-11/edition-6 (3).jpeg', cat: 'Événements', title: 'Discours Grand-Lahou', cols: 1, rows: 1 },
-  { id: 56, src: '/assets/img/news/grand-lahou-21-11/edition-6 (4).jpeg', cat: 'Événements', title: 'Remise des récompenses', cols: 1, rows: 1 },
-  { id: 57, src: '/assets/img/news/grand-lahou-21-11/edition-6 (5).jpeg', cat: 'Événements', title: 'Photo de groupe Grand-Lahou', cols: 1, rows: 1 },
-
-  /* ─── Délocalisation du marché aux poissons ─── */
-  { id: 58, src: '/assets/img/interpeche/delocalisation.jpeg', cat: 'Événements', title: 'Visite du nouveau site', cols: 1, rows: 1 },
-
-  /* ─── Présentation de vœux 2024 ─── */
-  { id: 59, src: '/assets/img/interpeche/IMG-20241207-WA0005.jpg', cat: 'Événements', title: 'Présentation de vœux 2024', cols: 1, rows: 1 },
-  { id: 60, src: '/assets/img/interpeche/IMG-20241207-WA0006.jpg', cat: 'Événements', title: 'Cérémonie officielle', cols: 1, rows: 1 },
-  { id: 61, src: '/assets/img/interpeche/IMG-20241207-WA0007.jpg', cat: 'Événements', title: 'Présentation de vœux', cols: 1, rows: 1 },
-  { id: 62, src: '/assets/img/interpeche/IMG-20241207-WA0008.jpg', cat: 'Événements', title: 'Discours du Président', cols: 1, rows: 1 },
-  { id: 63, src: '/assets/img/interpeche/IMG-20241207-WA0009.jpg', cat: 'Événements', title: 'Équipe Interpêche', cols: 1, rows: 1 },
-  { id: 64, src: '/assets/img/interpeche/IMG-20241207-WA0010.jpg', cat: 'Événements', title: 'Invités d\'honneur', cols: 1, rows: 1 },
-
-  /* ─── Salon de la pêche ─── */
-  { id: 65, src: '/assets/img/PM2.jpg', cat: 'Événements', title: 'Salon de la pêche 2025', cols: 1, rows: 1 },
-  { id: 66, src: '/assets/img/PM3.jpg', cat: 'Événements', title: 'Salon de la pêche — stand', cols: 1, rows: 1 },
-  { id: 67, src: '/assets/img/PM4.jpg', cat: 'Événements', title: 'Salon de la pêche — clôture', cols: 1, rows: 1 },
-
-  /* ─── Port d'Abidjan 75 ans ─── */
-  { id: 68, src: '/assets/img/news/port-abidjan-75ans/port-abidjan.jpg', cat: 'Événements', title: 'Port d\'Abidjan 75 ans', cols: 1, rows: 1 },
-]
-
 export default function Gallery() {
+  const [allPhotos, setAllPhotos]           = useState([])
   const [activeCategory, setActiveCategory] = useState('Toutes')
-  const [lightbox, setLightbox] = useState(null)
-  const [headerRef, headerVisible] = useReveal()
-  const [gridRef, gridVisible] = useReveal()
+  const [lightbox, setLightbox]             = useState(null)
+  const [headerRef, headerVisible]          = useReveal()
+  const [gridRef, gridVisible]              = useReveal()
 
-  const filtered = photos.filter((p) => activeCategory === 'Toutes' || p.cat === activeCategory)
+  useEffect(() => {
+    galleryApi.list({ limit: 200, published: 1 })
+      .then((rows) => setAllPhotos((rows || []).map(mapPhoto)))
+      .catch(console.error)
+  }, [])
+
+  const filtered = allPhotos.filter((p) => activeCategory === 'Toutes' || p.cat === activeCategory)
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') setLightbox(null) }
@@ -159,7 +72,7 @@ export default function Gallery() {
               >
                 {cat}
                 <span className="ml-1.5 text-xs opacity-60">
-                  ({cat === 'Toutes' ? photos.length : photos.filter((p) => p.cat === cat).length})
+                  ({cat === 'Toutes' ? allPhotos.length : allPhotos.filter((p) => p.cat === cat).length})
                 </span>
               </button>
             ))}
