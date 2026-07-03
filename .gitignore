@@ -23,6 +23,9 @@ requirements.txt
 schema.html
 seed_*.py
 
+# Fichiers parasites "Enregistrer la page"
+*_files/
+
 # OS
 .DS_Store
 Thumbs.db
