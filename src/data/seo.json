@@ -1,0 +1,58 @@
+{
+  "home": {
+    "title": "Interpêche CI — Au service des acteurs de la filière pêche",
+    "description": "Interprofession de la filière pêche Côte d'Ivoire. Fédérant et représentant tous les acteurs du secteur halieutique depuis 2023. 500+ membres, 50+ événements, 20+ partenaires.",
+    "image": "/og-home.png",
+    "url": "/",
+    "type": "website"
+  },
+  "about": {
+    "title": "Qui sommes-nous ? | Interpêche CI",
+    "description": "Découvrez l'histoire, la mission et les valeurs d'Interpêche CI, l'interprofession de la filière pêche en Côte d'Ivoire depuis 2023.",
+    "image": "/og-about.png",
+    "url": "/qui-sommes-nous",
+    "type": "website"
+  },
+  "activities": {
+    "title": "Nos activités | Interpêche CI",
+    "description": "Formation, plaidoyer, partenariats, représentation : explorez les activités d'Interpêche CI pour soutenir les acteurs de la filière pêche.",
+    "image": "/og-activities.png",
+    "url": "/activites",
+    "type": "website"
+  },
+  "governance": {
+    "title": "Organisation & Gouvernance | Interpêche CI",
+    "description": "Découvrez la structure organisationnelle, les organes de gouvernance et le cadre juridique d'Interpêche CI.",
+    "image": "/og-governance.png",
+    "url": "/organisation",
+    "type": "website"
+  },
+  "news": {
+    "title": "Actualités | Interpêche CI",
+    "description": "Restez informé des dernières actualités, événements et formations de la filière pêche en Côte d'Ivoire.",
+    "image": "/og-news.png",
+    "url": "/actualites",
+    "type": "website"
+  },
+  "gallery": {
+    "title": "Galerie photos | Interpêche CI",
+    "description": "Découvrez les photos des ateliers, événements et activités d'Interpêche CI en Côte d'Ivoire.",
+    "image": "/og-gallery.png",
+    "url": "/galerie",
+    "type": "website"
+  },
+  "videos": {
+    "title": "Vidéothèque | Interpêche CI",
+    "description": "Regardez les documentaires, reportages et présentations vidéo d'Interpêche CI sur la filière pêche.",
+    "image": "/og-videos.png",
+    "url": "/videotheque",
+    "type": "website"
+  },
+  "contact": {
+    "title": "Contactez-nous | Interpêche CI",
+    "description": "Prenez contact avec Interpêche CI pour toute question, partenariat ou adhésion. Zone Portuaire, Treichville, Abidjan.",
+    "image": "/og-contact.png",
+    "url": "/contact",
+    "type": "website"
+  }
+}

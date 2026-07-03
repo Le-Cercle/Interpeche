@@ -1,0 +1,24 @@
+# Bloquer l'accès direct aux fichiers sensibles
+Options -Indexes
+
+<Files "db.php">
+  Order Allow,Deny
+  Deny from all
+</Files>
+<Files "helpers.php">
+  Order Allow,Deny
+  Deny from all
+</Files>
+
+# Permettre les requêtes CORS OPTIONS (preflight)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{REQUEST_METHOD} OPTIONS
+  RewriteRule .* - [R=200,L]
+</IfModule>
+
+# Sécurité
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+</IfModule>

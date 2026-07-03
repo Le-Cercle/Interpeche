@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\OUATTARA AFOR\\\\Desktop\\\\WSpace\\\\WebSites\\\\I+1\\\\old\" -Recurse)",
+      "Bash(Select-Object -First 50)",
+      "Bash(Format-Table Name, FullName)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const ok=!fs.existsSync\\('../old'\\); console.log\\('Dossier old supprimé:', ok ? 'OUI' : 'NON'\\);\")",
+      "Bash(ls -la \"c:/Users/OUATTARA AFOR/Desktop/WSpace/WebSites/I+1/\")",
+      "Bash(node audit_images.mjs)",
+      "Bash(grep -v \"//\\\\|node_modules\")",
+      "Bash(node delete_unused.mjs)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\OUATTARA AFOR\\\\Desktop\\\\WSpace\\\\WebSites\\\\I+1\\\\v2\\\\src\" -Recurse -Force)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\OUATTARA AFOR\\Desktop\\WSpace\\WebSites\\I+1\\old",
+      "C:\\Users\\OUATTARA~2\\AppData\\Local\\Temp\\claude\\c--Users-OUATTARA-AFOR-Desktop-WSpace-WebSites-I-1-v2\\0c23515a-cde1-4505-a26c-7d664eebe5e1\\scratchpad"
+    ]
+  }
+}

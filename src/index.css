@@ -1,0 +1,308 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { @apply box-border; }
+  html { scroll-behavior: smooth; }
+  body { @apply font-sans text-gray-800 antialiased; }
+  h1, h2, h3, h4, h5, h6 { @apply font-sans; }
+}
+
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-coral-500 hover:bg-coral-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-coral hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 bg-ocean-600 hover:bg-ocean-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-ocean hover:-translate-y-0.5;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-2 border-2 border-white text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:bg-white hover:text-ocean-800;
+  }
+
+  .btn-outline-ocean {
+    @apply inline-flex items-center gap-2 border-2 border-ocean-600 text-ocean-600 font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:bg-ocean-600 hover:text-white;
+  }
+
+  .section-label {
+    @apply inline-block text-sm font-semibold text-coral-500 uppercase tracking-widest mb-3;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-gray-900 mb-4;
+  }
+
+  .section-desc {
+    @apply text-lg text-gray-500 max-w-2xl;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .glass {
+    @apply bg-white/10 backdrop-blur-sm border border-white/20;
+  }
+
+  /* Category badge colors */
+  .badge-evenement   { @apply bg-ocean-100 text-ocean-700; }
+  .badge-formation   { @apply bg-green-100 text-green-700; }
+  .badge-gouvernance { @apply bg-purple-100 text-purple-700; }
+  .badge-distinction { @apply bg-yellow-100 text-yellow-700; }
+  .badge-economie    { @apply bg-teal-100 text-teal-700; }
+  .badge-partenariat { @apply bg-blue-100 text-blue-700; }
+  .badge-innovation  { @apply bg-indigo-100 text-indigo-700; }
+  .badge-default     { @apply bg-gray-100 text-gray-700; }
+
+  /* Scroll reveal */
+  .reveal { @apply opacity-0 translate-y-8 transition-all duration-700 ease-out; }
+  .reveal.visible { @apply opacity-100 translate-y-0; }
+  .reveal-left { @apply opacity-0 -translate-x-8 transition-all duration-700 ease-out; }
+  .reveal-left.visible { @apply opacity-100 translate-x-0; }
+  .reveal-right { @apply opacity-0 translate-x-8 transition-all duration-700 ease-out; }
+  .reveal-right.visible { @apply opacity-100 translate-x-0; }
+}
+
+/* ─── Custom scrollbar ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #000b18; }
+::-webkit-scrollbar-thumb { background: #0096c7; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #48cae4; }
+
+/* ─── Gradient text ─── */
+.gradient-text {
+  background: linear-gradient(135deg, #0096c7, #48cae4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-text-coral {
+  background: linear-gradient(135deg, #f77f00, #ff9f47);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Carousel ─── */
+.carousel-slide {
+  transition: opacity 0.8s ease-in-out;
+}
+
+/* ─── Focus ─── */
+input:focus, textarea:focus, select:focus {
+  @apply outline-none ring-2 ring-ocean-400 ring-offset-0;
+}
+
+/* ══════════════════════════════════════════════
+   OCEAN ATMOSPHERE ANIMATIONS
+══════════════════════════════════════════════ */
+
+/* ── Bubbles ────────────────────────────────── */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 28%,
+    rgba(255,255,255,0.5)   0%,
+    rgba(144,224,239,0.20)  45%,
+    rgba(0,180,216,0.04)   100%
+  );
+  border: 1px solid rgba(255,255,255,0.25);
+  pointer-events: none;
+  bottom: -10%;
+  animation: bubble-rise linear infinite;
+}
+
+/* ── Light rays ─────────────────────────────── */
+.light-ray {
+  position: absolute;
+  top: -15%;
+  width: 4px;
+  height: 140%;
+  background: linear-gradient(
+    180deg,
+    rgba(144,224,239,0.0)  0%,
+    rgba(144,224,239,0.22) 22%,
+    rgba(0,180,216,0.12)   55%,
+    rgba(144,224,239,0.06) 78%,
+    rgba(144,224,239,0.0)  100%
+  );
+  transform: rotate(-8deg);
+  transform-origin: top center;
+  filter: blur(3px);
+  pointer-events: none;
+  animation: ray-shimmer ease-in-out infinite;
+}
+
+/* ── Animated waves ─────────────────────────── */
+.wave-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  height: 210px;
+  pointer-events: none;
+  z-index: 5;
+}
+.wave-layer {
+  position: absolute;
+  bottom: 0;
+  left: -50%;
+  width: 200%;
+}
+.wave-layer svg { display: block; width: 100%; height: auto; }
+
+.wave-3 {
+  animation: wave-drift 18s linear infinite;
+  z-index: 1;
+  opacity: 0.65;
+  bottom: 6px;
+}
+.wave-2 {
+  animation: wave-drift 13s linear infinite reverse;
+  z-index: 2;
+  opacity: 0.8;
+  bottom: 3px;
+}
+.wave-1 {
+  animation: wave-drift 8s linear infinite;
+  z-index: 3;
+}
+
+/* ── Fish ───────────────────────────────────── */
+.fish-swim-anim {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  animation: fish-swim linear forwards;
+}
+
+/* ── Caustic light overlay ──────────────────── */
+.caustic-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse at 15% 45%, rgba(0,180,216,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 20%, rgba(72,202,228,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 85%, rgba(0,150,199,0.09) 0%, transparent 50%);
+  background-size: 300% 300%;
+  animation: caustic-pulse 9s ease-in-out infinite;
+}
+
+/* ── Wave divider between sections ─────────── */
+.wave-divider { overflow: hidden; line-height: 0; pointer-events: none; }
+.wave-divider svg { display: block; width: 100%; }
+
+/* ── Service card ocean hover ───────────────── */
+.service-card {
+  transition: all 0.35s ease;
+  border: 1px solid transparent;
+}
+.service-card:hover {
+  border-color: rgba(0,180,216,0.2);
+  box-shadow: 0 0 0 1px rgba(0,180,216,0.12), 0 20px 55px rgba(0,105,148,0.2);
+  transform: translateY(-6px);
+}
+.service-icon {
+  transition: all 0.3s ease;
+}
+.service-card:hover .service-icon {
+  filter: drop-shadow(0 0 10px rgba(0,180,216,0.6));
+  transform: scale(1.12);
+}
+
+/* ── CTA glow ───────────────────────────────── */
+.btn-ocean-glow {
+  position: relative;
+  transition: all 0.3s ease;
+}
+.btn-ocean-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #00b4d8, #006994, #f77f00);
+  z-index: -1;
+  opacity: 0;
+  filter: blur(10px);
+  transition: opacity 0.4s ease;
+}
+.btn-ocean-glow:hover::before { opacity: 0.6; }
+
+/* ── Title bioluminescence ──────────────────── */
+.title-glow {
+  animation: biolum-glow 4s ease-in-out infinite;
+}
+
+/* ── Stat card ocean shimmer ────────────────── */
+.stat-card-ocean {
+  transition: all 0.4s ease;
+  border: 1px solid rgba(0,180,216,0.1);
+}
+.stat-card-ocean:hover {
+  border-color: rgba(0,180,216,0.3);
+  box-shadow: 0 0 30px rgba(0,180,216,0.2), inset 0 0 20px rgba(0,180,216,0.05);
+}
+
+/* ── Skeleton loading ───────────────────────── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+    #e8eef4 25%,
+    #cfe3ef 50%,
+    #e8eef4 75%
+  );
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ── Modal animations ───────────────────────── */
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (min-width: 640px) {
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+}
+
+.modal-animate {
+  animation: modal-in 0.3s cubic-bezier(0.34, 1.1, 0.64, 1) forwards;
+}

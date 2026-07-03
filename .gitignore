@@ -1,0 +1,30 @@
+node_modules/
+dist/
+
+# Variables d'environnement — ne jamais versionner
+.env
+.env.local
+.env.*.local
+
+# Fichier de connexion DB — contient le mot de passe
+api/db.php
+
+# Script de setup à usage unique
+api/setup.php
+
+# Python
+__pycache__/
+*.py
+*.pyc
+requirements.txt
+
+# Fichiers de seed et schéma DB (usage unique)
+*.sql
+schema.html
+seed_*.py
+
+# OS
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+desktop.ini
