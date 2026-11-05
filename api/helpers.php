@@ -1,4 +1,21 @@
 <?php
+// CORS d'abord : sans en-têtes CORS, une erreur serveur (500) apparaît dans le
+// navigateur comme une erreur CORS opaque et masque la vraie cause.
+set_exception_handler(function (Throwable $e) {
+    error_log('[interpeche-api] ' . $e);
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Erreur serveur']);
+    exit;
+});
+set_cors();
+
+if (!is_file(__DIR__ . '/db.php')) {
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Configuration serveur incomplète : api/db.php est manquant']);
+    exit;
+}
 require_once __DIR__ . '/db.php';
 
 // ── CORS ───────────────────────────────────────────────────
