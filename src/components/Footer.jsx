@@ -90,7 +90,7 @@ export default function Footer() {
                     to={link.to}
                     className="flex items-center gap-2 text-ocean-200 hover:text-coral-400 text-sm transition-colors duration-200 group"
                   >
-                    <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                    <ArrowRight className="w-0 h-3 opacity-0 -ml-2 group-hover:w-3 group-hover:ml-0 group-hover:opacity-100 transition-all duration-200" />
                     {link.label}
                   </Link>
                 </li>

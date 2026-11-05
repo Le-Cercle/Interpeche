@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import PageHero from '../components/PageHero'
 import { Fish, BookOpen, Handshake, Users, Megaphone, Leaf, ArrowRight, CheckCircle } from 'lucide-react'
 import { SEO } from '../components/SEO'
 import seoData from '../data/seo.json'
@@ -63,26 +64,7 @@ export default function Activities() {
     <>
       <SEO {...seoData.activities} />
       {/* Header */}
-      <section className="relative pt-32 pb-20 bg-gradient-to-br from-ocean-900 to-ocean-700 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="container relative text-center" ref={headerRef}>
-          <div className={`transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
-              <Fish className="w-4 h-4 text-coral-400" />
-              <span className="text-ocean-100 text-sm">Nos actions</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Nos Activités</h1>
-            <p className="text-ocean-100 text-lg max-w-2xl mx-auto leading-relaxed">
-              Découvrez les multiples actions menées par Interpêche CI pour le développement et la structuration de la filière pêche en Côte d'Ivoire.
-            </p>
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none" className="w-full">
-            <path d="M0 60L480 30C720 15 960 15 1440 30V60H0Z" fill="white" />
-          </svg>
-        </div>
-      </section>
+      <PageHero icon={Fish} eyebrow="Nos actions" title="Nos" accent="activités" crumb="Activités" subtitle="Découvrez les multiples actions menées par Interpêche CI pour le développement et la structuration de la filière pêche en Côte d'Ivoire." stats={[{ v: '50+', l: 'Événements organisés' }, { v: '1000+', l: 'Bénéficiaires' }]} />
 
       {/* Activities grid */}
       <section className="py-20 bg-white" ref={gridRef}>

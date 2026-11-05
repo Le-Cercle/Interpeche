@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import PageHero from '../components/PageHero'
 import { Play, Video, ExternalLink, ChevronLeft } from 'lucide-react'
 import { SEO } from '../components/SEO'
+import { EmptyState, SkeletonGrid } from '../components/EmptyState'
 import seoData from '../data/seo.json'
 import { useReveal } from '../hooks/useReveal'
 import { videos as videosApi } from '../services/api'
@@ -97,13 +99,15 @@ export default function Videos() {
   const [allVideos, setAllVideos]           = useState([])
   const [activeCategory, setActiveCategory] = useState('Toutes')
   const [playing, setPlaying]               = useState(null)
+  const [loaded, setLoaded]                 = useState(false)
   const [headerRef, headerVisible]          = useReveal()
   const [gridRef, gridVisible]              = useReveal()
 
   useEffect(() => {
     videosApi.list({ published: 1 })
-      .then((rows) => setAllVideos((rows || []).map(mapVideo)))
+      .then((rows) => setAllVideos((Array.isArray(rows) ? rows : []).map(mapVideo)))
       .catch(console.error)
+      .finally(() => setLoaded(true))
   }, [])
 
   const filtered = allVideos.filter((v) => activeCategory === 'Toutes' || v.category === activeCategory)
@@ -115,31 +119,12 @@ export default function Videos() {
     <>
       <SEO {...seoData.videos} />
       {/* ── Header ── */}
-      <section className="relative pt-32 pb-20 bg-gradient-to-br from-ocean-900 to-ocean-700 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="container relative text-center" ref={headerRef}>
-          <div className={`transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
-              <Video className="w-4 h-4 text-coral-400" />
-              <span className="text-ocean-100 text-sm">Médiathèque</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Vidéothèque</h1>
-            <p className="text-ocean-100 text-lg max-w-xl mx-auto">
-              Retrouvez toutes nos vidéos — reportages, événements, formations et temps forts de la filière pêche.
-            </p>
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none" className="w-full">
-            <path d="M0 60L480 30C720 15 960 15 1440 30V60H0Z" fill="white" />
-          </svg>
-        </div>
-      </section>
+      <PageHero icon={Video} eyebrow="Médiathèque" title="Vidéothèque" crumb="Vidéothèque" subtitle="Retrouvez toutes nos vidéos : reportages, événements, formations et temps forts de la filière pêche." />
 
       {/* Filters */}
       <section className="py-6 bg-white border-b border-gray-100 sticky top-20 z-30 shadow-sm">
         <div className="container">
-          <div className="flex items-center gap-2 overflow-x-auto">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -156,8 +141,14 @@ export default function Videos() {
       </section>
 
       {/* Grid */}
-      <section className="py-12 bg-gray-50 min-h-screen" ref={gridRef}>
+      <section className="py-12 bg-gray-50 min-h-[60vh]" ref={gridRef}>
         <div className="container">
+          {!loaded && <SkeletonGrid n={6} cols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" h="h-56" />}
+          {loaded && filtered.length === 0 && (
+            <EmptyState icon={Video} title="Aucune vidéo pour le moment"
+              text={activeCategory === 'Toutes' ? 'Nos reportages arrivent bientôt.' : `Aucune vidéo dans « ${activeCategory} ».`}
+              action={activeCategory !== 'Toutes' && <button onClick={() => setActiveCategory('Toutes')} className="btn-outline-ocean">Voir toutes les vidéos</button>} />
+          )}
 
           {/* Player actif */}
           {playingVid && (

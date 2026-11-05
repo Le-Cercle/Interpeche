@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PageHero from '../components/PageHero'
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle, MessageSquare, Facebook, Twitter, Linkedin, Youtube, AlertCircle } from 'lucide-react'
 import { SEO } from '../components/SEO'
 import seoData from '../data/seo.json'
@@ -70,26 +71,7 @@ export default function Contact() {
     <>
       <SEO {...seoData.contact} />
       {/* Header */}
-      <section className="relative pt-32 pb-20 bg-gradient-to-br from-ocean-900 to-ocean-700 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="container relative text-center" ref={headerRef}>
-          <div className={`transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
-              <MessageSquare className="w-4 h-4 text-coral-400" />
-              <span className="text-ocean-100 text-sm">Parlons ensemble</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Contactez-nous</h1>
-            <p className="text-ocean-100 text-lg max-w-xl mx-auto leading-relaxed">
-              Une question, un partenariat ou une adhésion ? Notre équipe est disponible pour vous accompagner.
-            </p>
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none" className="w-full">
-            <path d="M0 60L480 30C720 15 960 15 1440 30V60H0Z" fill="white" />
-          </svg>
-        </div>
-      </section>
+      <PageHero icon={MessageSquare} eyebrow="Parlons ensemble" title="Contactez" accent="notre équipe" crumb="Contact" subtitle="Une question, un partenariat ou une adhésion ? Notre équipe est disponible pour vous accompagner." />
 
       {/* Contact info cards */}
       <section className="py-20 bg-white">

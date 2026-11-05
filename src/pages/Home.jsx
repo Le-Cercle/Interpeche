@@ -6,25 +6,23 @@ import {
   Mail, Send, CheckCircle, TrendingUp, Shield, Globe, Waves,
 } from 'lucide-react'
 import { SEO } from '../components/SEO'
-import { articles as articlesApi } from '../services/api'
+import { contact as contactApi } from '../services/api'
+import { fetchAllArticles, loadCarouselConfig, pickCarousel, DEFAULT_CAROUSEL } from '../utils/articles'
+import HomeCarousel from '../components/HomeCarousel'
 import seoData from '../data/seo.json'
 
-const MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
-function formatDateFR(iso) {
-  if (!iso) return ''
-  const [y, m, d] = (iso.split('T')[0]).split('-')
-  return `${parseInt(d, 10)} ${MONTHS_FR[parseInt(m, 10) - 1]} ${y}`
-}
-const mapArticle = (a) => ({
-  ...a,
-  image:    a.image_url,
-  auteur:   a.auteur_nom,
-  date:     formatDateFR(a.date_publication),
-  carousel: Boolean(a.carousel),
-})
 import NewsModal from '../components/NewsModal'
 import LazyImage from '../components/LazyImage'
 import { useReveal } from '../hooks/useReveal'
+import { useParallax } from '../hooks/useParallax'
+import { RevealWords, ScrollLitText } from '../components/TextFX'
+
+
+function spot(e) {
+  const r = e.currentTarget.getBoundingClientRect()
+  e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
+  e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`)
+}
 
 /* ─── Animated counter with ease-out ─── */
 function useCounter(target, duration = 2000, active = false) {
@@ -35,6 +33,7 @@ function useCounter(target, duration = 2000, active = false) {
   useEffect(() => {
     if (!active) return
     let start = null
+    let id
     const easeOut = (t) => 1 - Math.pow(1 - t, 3) // cubic ease-out
     const raf = (ts) => {
       if (!start) start = ts
@@ -46,10 +45,11 @@ function useCounter(target, duration = 2000, active = false) {
         setTicking(true)
         setTimeout(() => setTicking(false), 80)
       }
-      if (p < 1) requestAnimationFrame(raf)
+      if (p < 1) id = requestAnimationFrame(raf)
       else setCount(target)
     }
-    requestAnimationFrame(raf)
+    id = requestAnimationFrame(raf)
+    return () => cancelAnimationFrame(id)
   }, [active, target, duration])
 
   return [count, ticking]
@@ -130,16 +130,15 @@ function SwimmingFish({ top, delay, duration, flipped, size }) {
   const [phase, setPhase] = useState(0) // 0=hidden, 1=swimming
 
   useEffect(() => {
-    const interval = (delay + duration + 25) * 1000
-    // First appearance
-    const t1 = setTimeout(() => setPhase(1), delay * 1000)
-    const t2 = setTimeout(() => setPhase(0), (delay + duration) * 1000)
-    // Repeat
-    const repeat = setInterval(() => {
+    const timers = new Set()
+    const later = (fn, ms) => { const t = setTimeout(() => { timers.delete(t); fn() }, ms); timers.add(t) }
+    const cycle = () => {
       setPhase(1)
-      setTimeout(() => setPhase(0), duration * 1000)
-    }, interval)
-    return () => { clearTimeout(t1); clearTimeout(t2); clearInterval(repeat) }
+      later(() => setPhase(0), duration * 1000)
+      later(cycle, (duration + 25) * 1000)
+    }
+    later(cycle, delay * 1000)
+    return () => timers.forEach(clearTimeout)
   }, [delay, duration])
 
   if (phase === 0) return null
@@ -147,6 +146,7 @@ function SwimmingFish({ top, delay, duration, flipped, size }) {
   return (
     <div
       className="fish-swim-anim"
+      aria-hidden="true"
       style={{
         top,
         animationDuration: `${duration}s`,
@@ -181,7 +181,19 @@ export default function Home() {
   const [carouselNews, setCarouselNews] = useState([])
   const [recentNews, setRecentNews]     = useState([])
 
-  const [slide, setSlide] = useState(0)
+  const heroRef = useParallax()
+  const [cfg, setCfg] = useState(DEFAULT_CAROUSEL)
+  const [qf, setQf] = useState({ name: '', email: '', message: '' })
+  const [qStatus, setQStatus] = useState('idle')
+  const sendQuick = async (e) => {
+    e.preventDefault()
+    setQStatus('sending')
+    try {
+      await contactApi.send({ ...qf, subject: 'Message rapide (accueil)' })
+      setQStatus('ok')
+      setQf({ name: '', email: '', message: '' })
+    } catch { setQStatus('error') }
+  }
   const [selectedArticle, setArticle] = useState(null)
   const [statsRef,    statsVisible]    = useReveal()
   const [servicesRef, servicesVisible] = useReveal()
@@ -194,18 +206,18 @@ export default function Home() {
   const [s4, t4] = useCounter(1000, 2500, statsVisible)
 
   useEffect(() => {
-    articlesApi.carousel().then((rows) => setCarouselNews((rows || []).map(mapArticle))).catch(console.error)
-    articlesApi.recent(3).then((rows) => setRecentNews((rows || []).map(mapArticle))).catch(console.error)
+    let off = false
+    ;(async () => {
+      const [conf, all] = await Promise.all([loadCarouselConfig(), fetchAllArticles(100)])
+      if (off) return
+      const picked = pickCarousel(all, conf)
+      const ids = new Set(picked.map((x) => String(x.id)))
+      setCfg(conf)
+      setCarouselNews(picked)
+      setRecentNews(all.filter((x) => !ids.has(String(x.id))).slice(0, 3))
+    })()
+    return () => { off = true }
   }, [])
-
-  const prevSlide = useCallback(() => setSlide((s) => (s - 1 + carouselNews.length) % carouselNews.length), [carouselNews.length])
-  const nextSlide = useCallback(() => setSlide((s) => (s + 1) % carouselNews.length), [carouselNews.length])
-
-  useEffect(() => {
-    if (carouselNews.length === 0) return
-    const t = setInterval(nextSlide, 6000)
-    return () => clearInterval(t)
-  }, [nextSlide, carouselNews.length])
 
   return (
     <>
@@ -213,51 +225,64 @@ export default function Home() {
       {selectedArticle && <NewsModal article={selectedArticle} onClose={() => setArticle(null)} />}
 
       {/* ══════════════════════════════════════════
+          À LA UNE — 5 dernières actualités
+      ══════════════════════════════════════════ */}
+      <HomeCarousel items={carouselNews} cfg={cfg} onOpen={setArticle} />
+
+      {/* ══════════════════════════════════════════
           HERO — Immersive deep ocean
       ══════════════════════════════════════════ */}
       <section
-        className="relative min-h-screen flex items-center overflow-hidden"
+        ref={heroRef}
+        className="parallax-scene relative min-h-[78vh] flex items-center overflow-hidden"
         style={{ background: 'linear-gradient(180deg,#000b18 0%,#001020 18%,#001e3c 48%,#003566 75%,#006994 100%)' }}
       >
-        {/* Caustic light overlay */}
-        <div className="caustic-overlay" />
+        {/* depth-0 caustics */}
+        <div className="depth-0 absolute inset-0" aria-hidden="true"><div className="caustic-overlay" /></div>
 
-        {/* Light rays */}
-        {RAYS.map((ray, i) => (
-          <div key={i} className="light-ray"
-            style={{ left: ray.left, width: `${ray.width}px`, animationDelay: ray.delay, animationDuration: ray.dur }} />
-        ))}
+        {/* depth-1 light rays */}
+        <div className="depth-1 absolute inset-0 pointer-events-none" aria-hidden="true">
+          {RAYS.map((ray, i) => (
+            <div key={i} className="light-ray"
+              style={{ left: ray.left, width: `${ray.width}px`, animationDelay: ray.delay, animationDuration: ray.dur }} />
+          ))}
+        </div>
 
-        {/* Rising bubbles */}
-        {BUBBLES.map((b, i) => (
-          <div key={i} className="bubble"
-            style={{ width: `${b.size}px`, height: `${b.size}px`, left: b.left, animationDelay: b.delay, animationDuration: b.dur }} />
-        ))}
+        {/* depth-2 bubbles */}
+        <div className="depth-2 absolute inset-0 pointer-events-none" aria-hidden="true">
+          {BUBBLES.map((b, i) => (
+            <div key={i} className="bubble"
+              style={{ width: `${b.size}px`, height: `${b.size}px`, left: b.left, animationDelay: b.delay, animationDuration: b.dur }} />
+          ))}
+        </div>
 
-        {/* Swimming fish */}
-        <SwimmingFish top="30%" delay={4}  duration={22} size={24} />
-        <SwimmingFish top="58%" delay={16} duration={28} size={34} flipped />
-        <SwimmingFish top="72%" delay={30} duration={18} size={16} />
+        {/* depth-5 foreground fish */}
+        <div className="depth-5 absolute inset-0 pointer-events-none" aria-hidden="true">
+          <SwimmingFish top="30%" delay={4}  duration={22} size={24} />
+          <SwimmingFish top="58%" delay={16} duration={28} size={34} flipped />
+          <SwimmingFish top="72%" delay={30} duration={18} size={16} />
+        </div>
 
         {/* Dot grid */}
-        <div className="absolute inset-0 opacity-[0.04]"
+        <div className="absolute inset-0 opacity-[0.04]" aria-hidden="true"
           style={{ backgroundImage: 'radial-gradient(circle,rgba(255,255,255,0.9) 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
 
         {/* Content */}
-        <div className="container relative z-10 pt-28 pb-52">
+        <div className="container relative z-10 pt-24 pb-44 depth-4">
           <div className="max-w-3xl">
             {/* Pill badge */}
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8">
+            <div className="hero-in inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8">
               <span className="w-2 h-2 bg-coral-400 rounded-full animate-pulse" />
               <span className="text-ocean-200 text-sm font-medium">Fondée le 3 août 2023 · Abidjan, Côte d'Ivoire</span>
             </div>
 
             {/* Title with bioluminescent glow */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6">
-              Au service des{' '}
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
+              <RevealWords text="Au service des" />
               <span
-                className="block mt-2 title-glow"
+                className="block mt-2 title-glow hero-in"
                 style={{
+                  animationDelay: '.6s',
                   background: 'linear-gradient(90deg,#48cae4 0%,#00b4d8 35%,#ff9f47 65%,#f77f00 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -266,17 +291,17 @@ export default function Home() {
               >
                 acteurs de la pêche
               </span>
-            </h1>
+            </h2>
 
-            <p className="text-lg md:text-xl text-ocean-200 mb-10 max-w-2xl leading-relaxed">
+            <p className="hero-in text-lg md:text-xl text-ocean-200 mb-10 max-w-2xl leading-relaxed" style={{ animationDelay: '.9s' }}>
               Interpêche Côte d'Ivoire fédère et représente tous les acteurs de la filière pêche pour un développement{' '}
               <strong className="text-white">durable et équitable</strong> du secteur halieutique ivoirien.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="hero-in flex flex-col sm:flex-row gap-4" style={{ animationDelay: '1.1s' }}>
               <Link
                 to="/contact"
-                className="btn-ocean-glow inline-flex items-center justify-center gap-2 bg-coral-500 hover:bg-coral-600 text-white font-bold px-8 py-4 rounded-xl text-base transition-all duration-300"
+                className="btn-ocean-glow inline-flex items-center justify-center gap-2 bg-coral-500 hover:bg-coral-400 text-ocean-950 font-bold px-8 py-4 rounded-xl text-base transition-all duration-300"
               >
                 Rejoindre la filière
                 <ArrowRight className="w-5 h-5" />
@@ -291,8 +316,8 @@ export default function Home() {
             </div>
 
             {/* Scroll hint */}
-            <div className="mt-14 flex items-center gap-3 text-ocean-500 text-xs">
-              <div className="w-px h-8 bg-gradient-to-b from-transparent via-ocean-400 to-transparent" />
+            <div className="mt-14 flex items-center gap-3 text-ocean-500 text-xs" aria-hidden="true">
+              <div className="scroll-line w-px h-10 bg-ocean-400/20" />
               <span className="text-ocean-300">Faites défiler pour explorer</span>
             </div>
           </div>
@@ -306,7 +331,7 @@ export default function Home() {
           STATS — Abysse → surface
       ══════════════════════════════════════════ */}
       <section
-        className="py-16 relative overflow-hidden"
+        className="stats-pull pb-16 pt-16"
         ref={statsRef}
       >
         <div className="container relative">
@@ -360,74 +385,6 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════
-          NEWS CAROUSEL
-      ══════════════════════════════════════════ */}
-      {carouselNews.length > 0 && (
-        <section className="py-20 relative" style={{ background: '#f3f4f6' }}>
-          <div className="container">
-            <div className="text-center mb-12">
-              <span className="section-label">À la Une</span>
-              <h2 className="section-title">Actualités récentes</h2>
-            </div>
-
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl group"
-              style={{ boxShadow: '0 30px 80px rgba(0,11,24,0.35)' }}>
-              <div className="relative h-[480px] md:h-[520px]">
-                {carouselNews.map((item, i) => (
-                  <div key={item.id} className="absolute inset-0 carousel-slide cursor-pointer"
-                    style={{ opacity: i === slide ? 1 : 0, zIndex: i === slide ? 1 : 0 }}
-                    onClick={() => setArticle(item)}
-                    role="button"
-                    tabIndex={i === slide ? 0 : -1}
-                    onKeyDown={(e) => e.key === 'Enter' && setArticle(item)}
-                  >
-                    <img src={item.image} alt={item.titre} className="w-full h-full object-cover"
-                      onError={(e) => { e.target.src = `https://picsum.photos/seed/${item.id}/1200/520` }} />
-                    <div className="absolute inset-0" style={{
-                      background: 'linear-gradient(0deg,rgba(0,11,24,0.92) 0%,rgba(0,30,60,0.45) 45%,transparent 100%)',
-                    }} />
-                    <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-                      <CategoryBadge cat={item.categorie} />
-                      <h3 className="text-2xl md:text-3xl font-bold text-white mt-3 mb-3 max-w-2xl leading-snug">{item.titre}</h3>
-                      <p className="text-ocean-100 text-sm md:text-base max-w-xl line-clamp-2 mb-4">{item.description}</p>
-                      <div className="flex items-center gap-4">
-                        <span className="text-ocean-300 text-sm">{item.date}</span>
-                        <span className="text-ocean-500">·</span>
-                        <span className="text-ocean-300 text-sm">{item.auteur}</span>
-                        <span className="ml-auto text-white/80 text-sm font-semibold underline-offset-2 hover:underline">
-                          Lire l'article →
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/15 hover:bg-white/35 backdrop-blur-sm flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100"
-                aria-label="Précédent"><ChevronLeft className="w-5 h-5" /></button>
-              <button onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/15 hover:bg-white/35 backdrop-blur-sm flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100"
-                aria-label="Suivant"><ChevronRight className="w-5 h-5" /></button>
-
-              <div className="absolute bottom-4 right-8 z-10 flex gap-2">
-                {carouselNews.map((_, i) => (
-                  <button key={i} onClick={() => setSlide(i)}
-                    className={`transition-all duration-300 rounded-full ${i === slide ? 'w-6 h-2 bg-coral-400' : 'w-2 h-2 bg-white/45 hover:bg-white/80'}`} />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-8 text-center">
-              <Link to="/actualites" className="btn-outline-ocean">
-                Toutes les actualités <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ══════════════════════════════════════════
           SERVICES — ocean card glow on hover
       ══════════════════════════════════════════ */}
       <section className="py-20 bg-white" ref={servicesRef}>
@@ -443,10 +400,11 @@ export default function Home() {
             {services.map((srv, i) => (
               <div
                 key={i}
-                className={`service-card bg-white rounded-2xl p-6 shadow-md transition-all duration-700 ${
+                className={`service-card spotlight bg-white rounded-2xl p-6 shadow-md transition-all duration-700 ${
                   servicesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{ transitionDelay: `${i * 80}ms` }}
+                onMouseMove={spot}
               >
                 <div className={`service-icon inline-flex w-12 h-12 rounded-2xl bg-gradient-to-br ${srv.gradient} items-center justify-center mb-4`}>
                   <srv.icon className="w-6 h-6 text-white" />
@@ -499,9 +457,10 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-snug">
                 Première interprofession de la filière pêche en Côte d'Ivoire
               </h2>
-              <p className="text-ocean-200 leading-relaxed mb-8">
-                Créée le 3 août 2023, Interpêche-CI rassemble l'ensemble des maillons de la chaîne de valeur halieutique — de la capture à la commercialisation — pour défendre les intérêts communs du secteur.
-              </p>
+              <ScrollLitText
+                className="text-ocean-100 text-lg leading-relaxed mb-8"
+                text="Créée le 3 août 2023, Interpêche-CI rassemble l'ensemble des maillons de la chaîne de valeur halieutique — de la capture à la commercialisation — pour défendre les intérêts communs du secteur."
+              />
               <ul className="space-y-4 mb-10">
                 {[
                   'Coordination de 500+ acteurs de la filière pêche',
@@ -527,7 +486,7 @@ export default function Home() {
                 <div className="absolute -top-2 -left-2 w-full h-full rounded-3xl border border-coral-500/15" />
                 <img
                   src="/assets/img/about.jpg" alt="Interpêche CI"
-                  className="relative rounded-3xl w-full h-80 object-cover"
+                  className="relative rounded-3xl w-full h-80 object-cover img-float"
                   style={{ boxShadow: '0 25px 60px rgba(0,11,24,0.7),0 0 0 1px rgba(0,180,216,0.15)' }}
                   onError={(e) => { e.target.src = 'https://picsum.photos/seed/fishing/700/400' }}
                 />
@@ -668,19 +627,27 @@ export default function Home() {
                 <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                   <Send className="w-4 h-4 text-coral-400" /> Message rapide
                 </h3>
-                <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-                  {[{ ph: 'Votre nom', type: 'text' }, { ph: 'Votre email', type: 'email' }].map(({ ph, type }, i) => (
-                    <input key={i} type={type} placeholder={ph}
-                      className="w-full px-4 py-2.5 text-white placeholder-ocean-400 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-coral-400 transition-colors"
-                      style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(0,180,216,0.2)' }} />
-                  ))}
-                  <textarea rows={3} placeholder="Votre message..."
-                    className="w-full px-4 py-2.5 text-white placeholder-ocean-400 rounded-xl text-sm resize-none focus:outline-none focus:ring-1 focus:ring-coral-400 transition-colors"
+                <form className="space-y-3" onSubmit={sendQuick}>
+                  <input type="text" required placeholder="Votre nom" aria-label="Votre nom" value={qf.name}
+                    onChange={(e) => setQf({ ...qf, name: e.target.value })}
+                    className="w-full px-4 py-2.5 text-white placeholder-ocean-300 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-coral-400 transition-colors"
                     style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(0,180,216,0.2)' }} />
-                  <button type="submit"
-                    className="btn-ocean-glow w-full flex items-center justify-center gap-2 bg-coral-500 hover:bg-coral-600 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors">
-                    <Send className="w-4 h-4" /> Envoyer le message
+                  <input type="email" required placeholder="Votre email" aria-label="Votre email" value={qf.email}
+                    onChange={(e) => setQf({ ...qf, email: e.target.value })}
+                    className="w-full px-4 py-2.5 text-white placeholder-ocean-300 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-coral-400 transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(0,180,216,0.2)' }} />
+                  <textarea rows={3} required placeholder="Votre message..." aria-label="Votre message" value={qf.message}
+                    onChange={(e) => setQf({ ...qf, message: e.target.value })}
+                    className="w-full px-4 py-2.5 text-white placeholder-ocean-300 rounded-xl text-sm resize-none focus:outline-none focus:ring-1 focus:ring-coral-400 transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(0,180,216,0.2)' }} />
+                  <button type="submit" disabled={qStatus === 'sending'}
+                    className="btn-ocean-glow w-full flex items-center justify-center gap-2 bg-coral-500 hover:bg-coral-600 disabled:opacity-60 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors">
+                    <Send className="w-4 h-4" /> {qStatus === 'sending' ? 'Envoi…' : 'Envoyer le message'}
                   </button>
+                  <p role="status" aria-live="polite" className={`text-sm min-h-[1.25rem] ${qStatus === 'ok' ? 'text-green-300' : 'text-red-300'}`}>
+                    {qStatus === 'ok' && 'Message envoyé. Merci !'}
+                    {qStatus === 'error' && "Échec de l'envoi. Réessayez ou écrivez-nous par email."}
+                  </p>
                 </form>
               </div>
             </div>
