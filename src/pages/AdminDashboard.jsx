@@ -13,6 +13,7 @@ import AdminBackupRestore from '../components/AdminBackupRestore'
 import AdminNewsManager from '../components/AdminNewsManager'
 import AdminMediaLibrary from '../components/AdminMediaLibrary'
 import AdminBrandManager from '../components/AdminBrandManager'
+import AdminCarouselManager from '../components/AdminCarouselManager'
 import RichTextEditor from '../components/RichTextEditor'
 
 const MODULES = [
@@ -21,6 +22,7 @@ const MODULES = [
   { id: 'stats', label: 'Statistiques', icon: TrendingUp },
   { id: 'content', label: 'Contenu', icon: FileText },
   { id: 'news', label: 'Actualités', icon: FileText },
+  { id: 'carousel', label: 'Carrousel accueil', icon: Image },
   { id: 'media', label: 'Médias', icon: Image },
   { id: 'wysiwyg', label: 'Éditeur WYSIWYG', icon: FileText },
   { id: 'gallery', label: 'Galerie', icon: Image },
@@ -126,6 +128,7 @@ export default function AdminDashboard() {
           {activeModule === 'stats' && <AdminAdvancedStats />}
           {activeModule === 'content' && <AdminContentEditor />}
           {activeModule === 'news' && <AdminNewsManager />}
+          {activeModule === 'carousel' && <AdminCarouselManager />}
           {activeModule === 'media' && <AdminMediaLibrary />}
           {activeModule === 'wysiwyg' && <AdminWYSIWYG />}
           {activeModule === 'gallery' && <AdminGalleryManager />}

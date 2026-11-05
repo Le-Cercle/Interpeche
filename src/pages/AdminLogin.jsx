@@ -11,20 +11,14 @@ export default function AdminLogin() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-
-    setTimeout(() => {
-      const result = login(username, password)
-      if (result.success) {
-        navigate('/admin/dashboard')
-      } else {
-        setError(result.error)
-      }
-      setLoading(false)
-    }, 500)
+    const result = await login(username.trim(), password)
+    setLoading(false)
+    if (result.success) navigate('/admin/dashboard')
+    else setError(result.error)
   }
 
   return (

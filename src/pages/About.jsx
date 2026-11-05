@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import PageHero from '../components/PageHero'
 import { Fish, Users, Award, Target, Zap, Heart, Globe, ArrowRight, Eye, CheckCircle, Calendar, TrendingUp, Search, Users2, Lightbulb, Waves } from 'lucide-react'
 import { SEO } from '../components/SEO'
 import seoData from '../data/seo.json'
@@ -23,26 +24,7 @@ export default function About() {
     <>
       <SEO {...seoData.about} />
       {/* Page header */}
-      <section className="relative pt-32 pb-20 bg-gradient-to-br from-ocean-900 to-ocean-700 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="container relative text-center" ref={heroRef}>
-          <div className={`transition-all duration-700 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
-              <Fish className="w-4 h-4 text-coral-400" />
-              <span className="text-ocean-100 text-sm">Notre identité</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Qui sommes-nous ?</h1>
-            <p className="text-ocean-100 text-lg max-w-2xl mx-auto leading-relaxed">
-              Interpêche Côte d'Ivoire est l'interprofession officielle de la filière pêche, fédérant l'ensemble des acteurs du secteur halieutique ivoirien depuis 2023.
-            </p>
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none" className="w-full">
-            <path d="M0 60L480 30C720 15 960 15 1440 30V60H0Z" fill="white" />
-          </svg>
-        </div>
-      </section>
+      <PageHero icon={Fish} eyebrow="Notre identité" title="Qui" accent="sommes-nous ?" crumb="Qui sommes-nous" subtitle="Interpêche Côte d'Ivoire est l'interprofession officielle de la filière pêche, fédérant l'ensemble des acteurs du secteur halieutique ivoirien depuis 2023." stats={[{ v: '2023', l: 'Année de création' }, { v: '500+', l: 'Membres actifs' }, { v: '20+', l: 'Partenaires' }]} />
 
       {/* Mission & Vision */}
       <section className="py-20 bg-white" ref={missionRef}>

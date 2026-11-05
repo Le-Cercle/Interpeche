@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import PageHero from '../components/PageHero'
 import { Link } from 'react-router-dom'
 import { SEO } from '../components/SEO'
 import seoData from '../data/seo.json'
@@ -195,31 +196,7 @@ export default function Governance() {
     <>
       <SEO {...seoData.governance} />
       {/* ── Header ── */}
-      <section className="relative pt-32 pb-20 overflow-hidden"
-        style={{ background: 'linear-gradient(135deg,#000b18 0%,#001e3c 50%,#003566 100%)' }}>
-        <div className="caustic-overlay" />
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-
-        <div className="container relative text-center" ref={headerRef}>
-          <div className={`transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
-              <Crown className="w-4 h-4 text-coral-400" />
-              <span className="text-ocean-100 text-sm">Structure organisationnelle</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">Organisation & Gouvernance</h1>
-            <p className="text-ocean-100 text-lg max-w-2xl mx-auto leading-relaxed">
-              Une gouvernance transparente et inclusive pour représenter efficacement tous les acteurs de la filière pêche ivoirienne.
-            </p>
-          </div>
-        </div>
-
-        <div className="wave-divider absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
-            <path d="M0,30 C360,60 720,0 1080,30 C1260,45 1380,15 1440,30 L1440,60 L0,60 Z" fill="white" />
-          </svg>
-        </div>
-      </section>
+      <PageHero icon={Crown} eyebrow="Structure organisationnelle" title="Organisation" accent="& gouvernance" crumb="Organisation" subtitle="Une gouvernance transparente et inclusive pour représenter efficacement tous les acteurs de la filière pêche ivoirienne." />
 
       {/* ── Organs ── */}
       <section className="py-20 bg-white" ref={orgRef}>

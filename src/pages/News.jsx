@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import PageHero from '../components/PageHero'
 import { Search, Filter, Calendar, User, X, Newspaper } from 'lucide-react'
 import { SEO } from '../components/SEO'
 import seoData from '../data/seo.json'
@@ -110,43 +111,22 @@ export default function News() {
       {selectedArticle && <NewsModal article={selectedArticle} onClose={closeArticle} />}
 
       {/* ── Page header ── */}
-      <section className="relative pt-32 pb-24 overflow-hidden"
-        style={{ background: 'linear-gradient(180deg,#000b18 0%,#001e3c 60%,#003566 100%)' }}>
-
-        {/* Caustic overlay */}
-        <div className="caustic-overlay" />
-
-        {/* Dot grid */}
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{ backgroundImage: 'radial-gradient(circle,rgba(255,255,255,0.9) 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
-
-        <div className="container relative text-center" ref={headerRef}>
-          <div className={`transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
-              <Newspaper className="w-4 h-4 text-coral-400" />
-              <span className="text-ocean-100 text-sm">Restez informé</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">Actualités</h1>
-            <p className="text-ocean-200 text-lg max-w-xl mx-auto mb-10">
-              Suivez toute l'actualité d'Interpêche CI et de la filière pêche en Côte d'Ivoire.
-            </p>
-
-            {/* ── Search bar ── */}
-            <div className="relative max-w-lg mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ocean-400 pointer-events-none" />
+      <PageHero icon={Newspaper} eyebrow="Restez informé" title="Toutes les" accent="actualités" crumb="Actualités" subtitle="Suivez toute l'actualité d'Interpêche CI et de la filière pêche en Côte d'Ivoire.">
+{/* ── Search bar ── */}
+            <div className="relative max-w-lg">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ocean-600 pointer-events-none" />
               <input
                 ref={searchRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher un titre, un auteur, un mot-clé…"
-                className="w-full pl-12 pr-12 py-3.5 rounded-2xl text-sm text-white placeholder-ocean-400 focus:outline-none focus:ring-2 focus:ring-coral-400 transition-all"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(0,180,216,0.25)', backdropFilter: 'blur(10px)' }}
+                className="w-full pl-12 pr-12 py-4 rounded-2xl text-base text-gray-900 placeholder-gray-500 bg-white shadow-xl shadow-ocean-950/30 border border-white focus:outline-none focus:ring-4 focus:ring-coral-400/60 transition-all"
               />
               {search && (
                 <button
                   onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/15 hover:bg-white/30 flex items-center justify-center text-white/70 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
                   aria-label="Effacer"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -160,16 +140,7 @@ export default function News() {
                 {filtered.length} résultat{filtered.length !== 1 ? 's' : ''} pour « <span className="text-white font-medium">{debouncedSearch}</span> »
               </p>
             )}
-          </div>
-        </div>
-
-        {/* Bottom wave */}
-        <div className="wave-divider absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
-            <path d="M0,30 C360,60 720,0 1080,30 C1260,45 1380,15 1440,30 L1440,60 L0,60 Z" fill="white" />
-          </svg>
-        </div>
-      </section>
+</PageHero>
 
       {/* ── Filter bar (sticky) ── */}
       <section className="py-4 bg-white border-b border-gray-100 sticky top-20 z-30 shadow-sm">
