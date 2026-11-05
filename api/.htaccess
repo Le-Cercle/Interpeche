@@ -10,12 +10,8 @@ Options -Indexes
   Deny from all
 </Files>
 
-# Permettre les requêtes CORS OPTIONS (preflight)
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteCond %{REQUEST_METHOD} OPTIONS
-  RewriteRule .* - [R=200,L]
-</IfModule>
+# NB : les requêtes OPTIONS (preflight) doivent atteindre PHP, qui renvoie
+# les en-têtes CORS (helpers.php > set_cors). Ne pas les court-circuiter ici.
 
 # Sécurité
 <IfModule mod_headers.c>
