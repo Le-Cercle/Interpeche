@@ -10,9 +10,13 @@ function set_cors(): void {
         'https://www.interpeche-ci.org',
         'https://interpeche-ci.com',
         'https://www.interpeche-ci.com',
+        'https://interpeche.vercel.app',
     ];
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    if (in_array($origin, $allowed, true)) {
+    // Origines supplémentaires via variable d'environnement (ex. previews Vercel), séparées par des virgules
+    $extra = array_filter(array_map('trim', explode(',', getenv('CORS_EXTRA_ORIGINS') ?: '')));
+    header('Vary: Origin');
+    if (in_array($origin, array_merge($allowed, $extra), true)) {
         header("Access-Control-Allow-Origin: $origin");
     }
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
